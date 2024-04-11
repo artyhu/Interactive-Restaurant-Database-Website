@@ -1,0 +1,234 @@
+drop database if exists restaurantDB;
+create database restaurantDB;
+USE restaurantDB;
+
+CREATE TABLE Restaurant(
+restoName		VARCHAR(50)	NOT NULL,
+URL				VARCHAR(100),
+Street			VARCHAR(50),
+City			VARCHAR(50),
+PC				CHAR(6),
+PRIMARY KEY(restoName));
+
+CREATE TABLE Employee(
+EmployeeID		INTEGER		NOT NULL,
+restoName		VARCHAR(50)	NOT NULL,
+fName			VARCHAR(50),
+lName			VARCHAR(50),
+Email			VARCHAR(50),
+PRIMARY KEY(EmployeeID),
+FOREIGN KEY (restoName) REFERENCES Restaurant(restoName) ON DELETE RESTRICT);
+
+CREATE TABLE CustomerAcct(
+Email			VARCHAR(50)	NOT NULL,
+cfName			VARCHAR(50),
+clName			VARCHAR(50),
+Phone			CHAR(12),
+Street			VARCHAR(50),
+City			VARCHAR(50),
+PC				CHAR(6),
+CreditAmount	DECIMAL(8,2),
+PRIMARY KEY(Email));
+
+CREATE TABLE Food(
+foodName		VARCHAR(40)	NOT NULL,
+PRIMARY KEY(foodName));
+
+CREATE TABLE Manager(
+EmployeeID		INTEGER		NOT NULL,
+PRIMARY KEY(EmployeeID),
+FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID) ON DELETE CASCADE);
+
+CREATE TABLE EmpServer(
+EmployeeID		INTEGER		NOT NULL,
+PRIMARY KEY(EmployeeID),
+FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID) ON DELETE CASCADE);
+
+CREATE TABLE DeliveryEmployee(
+EmployeeID		INTEGER		NOT NULL,
+PRIMARY KEY(EmployeeID),
+FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID) ON DELETE CASCADE);
+
+CREATE TABLE Chef(
+EmployeeID		INTEGER		NOT NULL,
+PRIMARY KEY(EmployeeID),
+FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID) ON DELETE CASCADE);
+
+CREATE TABLE foodOrder(
+orderID			INTEGER		NOT NULL,
+totalPrice		DECIMAL(7,2),
+tip				DECIMAL(7,2),
+restoName		VARCHAR(50)	NOT NULL,
+timePlaced      TIME,
+timeDelivered       TIME,
+dateDelivered       DATE,
+CustEmail		VARCHAR(50)	NOT NULL,
+EmployeeID		INTEGER		NOT NULL,
+PRIMARY KEY(orderID),
+FOREIGN KEY(restoName) REFERENCES Restaurant(restoName) ON DELETE CASCADE,	
+FOREIGN KEY (CustEmail) REFERENCES CustomerAcct(Email) ON DELETE CASCADE,
+FOREIGN KEY (EmployeeID) REFERENCES DeliveryEmployee(EmployeeID) ON DELETE CASCADE);
+
+CREATE TABLE Shift(
+Day				VARCHAR(15)		NOT NULL,
+EID				INTEGER		NOT NULL,
+starttime		TIME,
+endtime			TIME,
+PRIMARY KEY (Day, EID),
+FOREIGN KEY (EID) REFERENCES Employee(EmployeeID) ON DELETE CASCADE);
+
+CREATE TABLE Payment(
+Date			DATE		NOT NULL,
+CustEmail		VARCHAR(50)	NOT NULL,
+Amount			DECIMAL(8,2),
+PRIMARY KEY (Date, CustEmail),
+FOREIGN KEY (CustEmail) REFERENCES CustomerAcct(Email) ON DELETE CASCADE);
+
+CREATE TABLE CustRelatedEmployee(
+CustEmail		VARCHAR(50)	NOT NULL,
+EmployeeID		INTEGER		NOT NULL,
+Relationship	VARCHAR(50),
+PRIMARY KEY (EmployeeID, CustEmail),
+FOREIGN KEY (CustEmail) REFERENCES CustomerAcct(Email),
+FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID));
+
+CREATE TABLE OrderContainsFood(
+orderID			INTEGER		NOT NULL,
+foodName		VARCHAR(40)	NOT NULL,
+PRIMARY KEY (orderID, foodName),
+FOREIGN KEY (orderID) REFERENCES foodOrder(orderID),
+FOREIGN KEY (foodName) REFERENCES Food(foodName));
+
+CREATE TABLE restaurantOffersFood(
+rName			VARCHAR(50)	NOT NULL,
+foodName		VARCHAR(40)	NOT NULL,
+Price			DECIMAL(5,2),
+PRIMARY KEY (rName, foodName),
+FOREIGN KEY (rName) REFERENCES Restaurant(restoName),
+FOREIGN KEY (foodName) REFERENCES Food(foodName));
+
+
+CREATE TABLE credentials(
+chefID			INTEGER		NOT NULL,
+Credentials		VARCHAR(50)	NOT NULL,
+PRIMARY KEY (chefID, Credentials),
+FOREIGN KEY (chefID) REFERENCES Chef(EmployeeID) ON DELETE CASCADE);
+
+insert into Restaurant values
+('McD','www.McD.com','Brock','Kingston','K7L4H4'),
+('BKing','www.BKing.com','Division','Ottawa','B5A5E4'),
+('Arbys','www.Arbys.com','Albert','Montreal','C6B4A2'),
+('PizzaP','www.PizzaP.com','Alfred','Toronto','J8D3E3'),
+('Tims','www.Tims.com','Victoria','Halifax','L8K5H2'),
+('Lazy','www.Lazy.com','Chartwell','Oakville','E9H2V2')
+;
+
+insert into Employee values
+('123','BKing','RT','Who','RT@gmail.com'),
+('1234','McD','Yovil','Mang','Yo@gmail.com'),
+('247','PizzaP','James','Greg','JG@gmail.com'),
+('241','Lazy','Isaac','Newton','IN@gmail.com'),
+('3','Arbys','Dan','Rad','DR@gmail.com'),
+('21','Tims','Ben','Eg','BE@gmail.com')
+;
+
+insert into CustomerAcct values
+('John@gmail.com','John','Pick','902-455-4235','Royal Mast','Kingston','K6B5E4','20.0'),
+('Jimmy@gmail.com','Jim','Sauce','809-433-2145','Dunbrack','Ottawa','C2K3E2','0.0'),
+('Mark@gmail.com','Mark','Stone','234-432-6789','Union','Halifax','Z2K2B2','120.0'),
+('Jill@gmail.com','Jill','Ped','431-541-6742','Ahmadi','Montreal','B4C2B2','5.0'),
+('Aron@gmail.com','Aron','Ed','746-541-2234','Terradore','Toronto','D2J3B5','2.0'),
+('Morgan@gmail.com','Morgan','Jan','662-226-5414','Acadia Mill','Oakville','P2H3E4','1.0')
+;
+
+insert into Food values
+('Burger'),
+('Cheeseburger'),
+('Hot Dog'),
+('Pizza'),
+('Fries'),
+('Milkshake')
+;
+
+
+insert into Manager values
+('1234')
+;
+
+insert into EmpServer values
+('123'),
+('247')
+;
+
+insert into DeliveryEmployee values
+('241')
+;
+
+insert into Chef values
+('3'),
+('21')
+;
+
+insert into foodOrder values
+('1','120.1','0.0','McD','4:30','4:50','2023-04-05','Jimmy@gmail.com','241'),
+('3','22.0','3.0','Lazy','9:30','9:50','2023-05-11','John@gmail.com','241'),
+('5','35.4','1.0','PizzaP','1:00','1:15','2023-06-12','Mark@gmail.com','241'),
+('2','5.0','20.0','BKing','12:00','12:20','2023-04-19','Morgan@gmail.com','241'),
+('10','98.0','3.2','Tims','8:00','8:20','2023-05-07','Jill@gmail.com','241'),
+('4','245.2','25.2','Arbys','4:00','4:20','2023-06-05','Aron@gmail.com','241')
+;
+
+insert into Shift values
+('Saturday','123','8:00','17:00'),
+('Sunday','1234','9:00','18:00'),
+('Monday','241','9:00','16:00'),
+('Tuesday','247','7:00','15:00'),
+('Wednesday','3','8:30','16:30'),
+('Friday','21','10:00','18:00')
+;
+
+insert into Payment values
+('2023-04-05','Jimmy@gmail.com','100.00'),
+('2023-02-05','Morgan@gmail.com','85.40'),
+('2023-03-07','Jill@gmail.com','20.2'),
+('2023-03-25','Aron@gmail.com','246.8'),
+('2023-01-15','Mark@gmail.com','54.5'),
+('2023-04-27','John@gmail.com','320.5')
+;
+
+insert into CustRelatedEmployee values
+('Jimmy@gmail.com','123','Dad'),
+('Morgan@gmail.com','1234','Son'),
+('Jill@gmail.com','247','Daughter'),
+('Aron@gmail.com','241','Uncle'),
+('Mark@gmail.com','3','Brother'),
+('John@gmail.com','21','Cousin')
+;
+
+insert into OrderContainsFood values
+('1','Burger'),
+('3','Cheeseburger'),
+('5','Hot Dog'),
+('2','Pizza'),
+('10','Fries'),
+('4','Milkshake')
+;
+
+insert into restaurantOffersFood values
+('McD','Burger','2.0'),
+('BKing','Fries','1.0'),
+('Arbys', 'Cheeseburger','3.0'),
+('PizzaP','Pizza','5.0'),
+('Tims','Milkshake','1.5'),
+('Lazy','Hot Dog','2.0')
+;
+
+insert into credentials values
+('3','Certified Personal Chef'),
+('21','Certified Executive Chef'),
+('3','Certified Master Chef'),
+('21','Certified Sous Chef'),
+('3','Certified Working Pastry Chef'),
+('21','Certified Culinary Educator')
+;
+
